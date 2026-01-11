@@ -1,0 +1,104 @@
+import math
+
+board = [" " for _ in range(9)]
+human = "X"
+ai = "O"
+
+wins = losses = draws = 0
+
+def print_board():
+    for i in range(0, 9, 3):
+        print(board[i:i+3])
+
+def check_winner(player):
+    combos = [
+        (0,1,2),(3,4,5),(6,7,8),
+        (0,3,6),(1,4,7),(2,5,8),
+        (0,4,8),(2,4,6)
+    ]
+    return any(all(board[i] == player for i in combo) for combo in combos)
+
+def is_draw():
+    return " " not in board
+
+def minimax(is_maximizing):
+    if check_winner(ai):
+        return 1
+    if check_winner(human):
+        return -1
+    if is_draw():
+        return 0
+
+    if is_maximizing:
+        best_score = -math.inf
+        for i in range(9):
+            if board[i] == " ":
+                board[i] = ai
+                score = minimax(False)
+                board[i] = " "
+                best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = math.inf
+        for i in range(9):
+            if board[i] == " ":
+                board[i] = human
+                score = minimax(True)
+                board[i] = " "
+                best_score = min(score, best_score)
+        return best_score
+
+def ai_move():
+    best_score = -math.inf
+    move = 0
+    for i in range(9):
+        if board[i] == " ":
+            board[i] = ai
+            score = minimax(False)
+            board[i] = " "
+            if score > best_score:
+                best_score = score
+                move = i
+    board[move] = ai
+
+def play_game():
+    global wins, losses, draws
+    for i in range(9):
+        board[i] = " "
+
+    while True:
+        print_board()
+        move = int(input("Enter your move (0-8): "))
+        if board[move] == " ":
+            board[move] = human
+
+        if check_winner(human):
+            print_board()
+            print("You win!")
+            losses += 1
+            break
+
+        if is_draw():
+            print("Draw!")
+            draws += 1
+            break
+
+        ai_move()
+
+        if check_winner(ai):
+            print_board()
+            print("AI wins!")
+            wins += 1
+            break
+
+        if is_draw():
+            print("Draw!")
+            draws += 1
+            break
+
+    print(f"Wins: {wins}, Losses: {losses}, Draws: {draws}")
+
+while True:
+    play_game()
+    if input("Play again? (y/n): ") != "y":
+        break
