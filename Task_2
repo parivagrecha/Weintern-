@@ -1,0 +1,66 @@
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+
+
+data = {
+    "text": [
+        "Win a free iPhone now",
+        "Limited offer buy now",
+        "Meeting scheduled at 10 am",
+        "Project submission tomorrow",
+        "Congratulations you won lottery",
+        "Let's discuss the assignment",
+        "Free cashback available",
+        "Important notice from college"
+    ],
+    "label": [
+        "spam",
+        "spam",
+        "ham",
+        "ham",
+        "spam",
+        "ham",
+        "spam",
+        "ham"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df["text"], df["label"], test_size=0.25, random_state=42
+)
+
+
+vectorizer = TfidfVectorizer(stop_words='english')
+X_train_tfidf = vectorizer.fit_transform(X_train)
+X_test_tfidf = vectorizer.transform(X_test)
+
+
+model = MultinomialNB()
+model.fit(X_train_tfidf, y_train)
+
+
+y_pred = model.predict(X_test_tfidf)
+
+print("Classification Report:\n")
+print(classification_report(y_test, y_pred))
+
+print("Confusion Matrix:\n")
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+
+
+plt.figure()
+plt.imshow(cm)
+plt.title("Confusion Matrix")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.colorbar()
+plt.show()
